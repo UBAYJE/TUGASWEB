@@ -1,0 +1,1363 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>UZCOOL — Future Starts Here</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #03050a;
+            --bg2: #080c14;
+            --white: #f5f7ff;
+            --muted: #7d879c;
+            --cyan: #00f0ff;
+            --purple: #7c3cff;
+            --pink: #ff2fb3;
+            --green: #00ffae;
+            --border: rgba(255,255,255,.09);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--white);
+            font-family: "Inter", sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* =================================
+           BACKGROUND
+        ================================= */
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    rgba(0,240,255,.025) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(0,240,255,.025) 1px,
+                    transparent 1px
+                );
+
+            background-size: 55px 55px;
+
+            pointer-events: none;
+            z-index: -3;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            width: 500px;
+            height: 500px;
+
+            left: 50%;
+            top: 10%;
+
+            transform: translateX(-50%);
+
+            background: var(--cyan);
+            opacity: .06;
+
+            filter: blur(160px);
+            border-radius: 50%;
+
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        /* =================================
+           NAVBAR
+        ================================= */
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+
+            height: 75px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 7%;
+
+            background: rgba(3,5,10,.65);
+            backdrop-filter: blur(20px);
+
+            border-bottom: 1px solid var(--border);
+
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: 4px;
+
+            color: white;
+
+            text-shadow:
+                0 0 10px rgba(0,240,255,.4);
+        }
+
+        .logo span {
+            color: var(--cyan);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 35px;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--muted);
+
+            font-size: 13px;
+            font-weight: 500;
+
+            transition: .3s;
+        }
+
+        .nav-menu a:hover {
+            color: var(--cyan);
+
+            text-shadow:
+                0 0 10px rgba(0,240,255,.7);
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+
+            border-radius: 30px;
+
+            background: transparent;
+
+            border: 1px solid rgba(0,240,255,.45);
+
+            color: var(--cyan);
+
+            cursor: pointer;
+
+            transition: .3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--cyan);
+            color: #001014;
+
+            box-shadow:
+                0 0 25px rgba(0,240,255,.45);
+        }
+
+        /* =================================
+           HERO
+        ================================= */
+
+        .hero {
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            padding:
+                120px 7% 80px;
+
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 950px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+
+            padding: 9px 17px;
+
+            border-radius: 50px;
+
+            border: 1px solid rgba(0,240,255,.25);
+
+            background:
+                rgba(0,240,255,.035);
+
+            color: var(--cyan);
+
+            font-size: 11px;
+            letter-spacing: 2px;
+
+            animation: fadeUp .8s ease;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+
+            background: var(--green);
+
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 12px var(--green);
+        }
+
+        .hero h1 {
+            margin-top: 28px;
+
+            font-family: "Orbitron", sans-serif;
+
+            font-size:
+                clamp(55px, 11vw, 145px);
+
+            line-height: .9;
+
+            letter-spacing: -7px;
+
+            animation: fadeUp 1s ease;
+        }
+
+        .hero h1 span {
+            color: transparent;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--cyan),
+                    #ffffff,
+                    var(--purple),
+                    var(--pink)
+                );
+
+            background-size: 250%;
+
+            background-clip: text;
+            -webkit-background-clip: text;
+
+            animation: gradientMove 5s linear infinite;
+        }
+
+        .hero-subtitle {
+            margin: 35px auto 0;
+
+            max-width: 650px;
+
+            color: var(--muted);
+
+            font-size: 16px;
+            line-height: 1.8;
+
+            animation: fadeUp 1.2s ease;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+
+            margin-top: 35px;
+
+            animation: fadeUp 1.4s ease;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            padding: 14px 25px;
+
+            border-radius: 10px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: .3s;
+        }
+
+        .btn-primary {
+            border: none;
+
+            background: var(--cyan);
+            color: #001014;
+
+            box-shadow:
+                0 0 25px rgba(0,240,255,.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+
+            box-shadow:
+                0 0 40px rgba(0,240,255,.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,.03);
+
+            color: white;
+
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* =================================
+           ORBIT
+        ================================= */
+
+        .orbit {
+            position: absolute;
+
+            width: 500px;
+            height: 500px;
+
+            border:
+                1px solid rgba(0,240,255,.08);
+
+            border-radius: 50%;
+
+            animation: rotate 20s linear infinite;
+
+            pointer-events: none;
+        }
+
+        .orbit::before {
+            content: "";
+
+            position: absolute;
+
+            width: 10px;
+            height: 10px;
+
+            background: var(--cyan);
+
+            border-radius: 50%;
+
+            top: 40px;
+            left: 80px;
+
+            box-shadow:
+                0 0 25px var(--cyan);
+        }
+
+        .orbit-two {
+            width: 700px;
+            height: 700px;
+
+            border-color:
+                rgba(124,60,255,.06);
+
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
+
+        /* =================================
+           SECTION
+        ================================= */
+
+        section {
+            padding: 100px 7%;
+        }
+
+        .section-head {
+            max-width: 700px;
+            margin-bottom: 45px;
+        }
+
+        .section-label {
+            color: var(--cyan);
+
+            font-family: "Orbitron";
+
+            font-size: 11px;
+
+            letter-spacing: 3px;
+
+            margin-bottom: 12px;
+        }
+
+        .section-head h2 {
+            font-family: "Orbitron";
+
+            font-size:
+                clamp(28px, 4vw, 48px);
+
+            line-height: 1.15;
+        }
+
+        .section-head p {
+            color: var(--muted);
+
+            margin-top: 15px;
+
+            line-height: 1.7;
+        }
+
+        /* =================================
+           FEATURES
+        ================================= */
+
+        .features {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 20px;
+        }
+
+        .feature-card {
+            position: relative;
+
+            min-height: 260px;
+
+            padding: 28px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.045),
+                    rgba(255,255,255,.015)
+                );
+
+            border: 1px solid var(--border);
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            transition: .4s;
+        }
+
+        .feature-card::after {
+            content: "";
+
+            position: absolute;
+
+            width: 150px;
+            height: 150px;
+
+            right: -70px;
+            bottom: -70px;
+
+            border-radius: 50%;
+
+            background: var(--cyan);
+
+            filter: blur(70px);
+
+            opacity: .08;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+
+            border-color:
+                rgba(0,240,255,.35);
+
+            box-shadow:
+                0 20px 50px rgba(0,0,0,.35);
+        }
+
+        .feature-number {
+            font-family: "Orbitron";
+
+            color: rgba(0,240,255,.5);
+
+            font-size: 11px;
+        }
+
+        .feature-icon {
+            font-size: 35px;
+
+            margin:
+                30px 0 20px;
+        }
+
+        .feature-card h3 {
+            font-family: "Orbitron";
+
+            font-size: 16px;
+
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+        /* =================================
+           SHOWCASE
+        ================================= */
+
+        .showcase {
+            display: grid;
+
+            grid-template-columns:
+                1.1fr .9fr;
+
+            gap: 25px;
+        }
+
+        .showcase-main,
+        .showcase-side {
+            border:
+                1px solid var(--border);
+
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,.025);
+
+            overflow: hidden;
+        }
+
+        .showcase-main {
+            min-height: 450px;
+
+            padding: 45px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            background:
+                radial-gradient(
+                    circle at 80% 20%,
+                    rgba(0,240,255,.15),
+                    transparent 30%
+                ),
+                linear-gradient(
+                    145deg,
+                    #0a1620,
+                    #080a12
+                );
+        }
+
+        .showcase-main h3 {
+            font-family: "Orbitron";
+
+            font-size: 38px;
+
+            max-width: 500px;
+        }
+
+        .showcase-main h3 span {
+            color: var(--cyan);
+        }
+
+        .showcase-main p {
+            color: var(--muted);
+
+            max-width: 500px;
+
+            line-height: 1.8;
+
+            margin-top: 20px;
+        }
+
+        .showcase-side {
+            display: grid;
+
+            grid-template-rows:
+                1fr 1fr;
+        }
+
+        .mini-card {
+            padding: 30px;
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+        .mini-card:last-child {
+            border-bottom: none;
+        }
+
+        .mini-card h3 {
+            font-family: "Orbitron";
+
+            margin-bottom: 12px;
+        }
+
+        .mini-card p {
+            color: var(--muted);
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+        /* =================================
+           CTA
+        ================================= */
+
+        .cta {
+            margin:
+                60px 7% 100px;
+
+            padding: 80px 30px;
+
+            text-align: center;
+
+            border:
+                1px solid rgba(0,240,255,.15);
+
+            border-radius: 25px;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(0,240,255,.09),
+                    transparent 60%
+                );
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .cta h2 {
+            font-family: "Orbitron";
+
+            font-size:
+                clamp(30px, 5vw, 60px);
+        }
+
+        .cta p {
+            color: var(--muted);
+
+            max-width: 550px;
+
+            margin: 20px auto 30px;
+
+            line-height: 1.7;
+        }
+
+        /* =================================
+           FOOTER
+        ================================= */
+
+        footer {
+            padding: 35px 7%;
+
+            border-top:
+                1px solid var(--border);
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        footer strong {
+            color: var(--cyan);
+
+            font-family: "Orbitron";
+
+            letter-spacing: 2px;
+        }
+
+        /* =================================
+           ANIMATIONS
+        ================================= */
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0%;
+            }
+
+            100% {
+                background-position: 250%;
+            }
+        }
+
+        @keyframes fadeUp {
+
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+        /* =================================
+           RESPONSIVE
+        ================================= */
+
+        @media (max-width: 850px) {
+
+            .nav-menu {
+                display: none;
+            }
+
+            .hero h1 {
+                letter-spacing: -4px;
+            }
+
+            .orbit {
+                width: 350px;
+                height: 350px;
+            }
+
+            .orbit-two {
+                width: 500px;
+                height: 500px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .showcase {
+                grid-template-columns: 1fr;
+            }
+
+            .showcase-main {
+                min-height: 380px;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .navbar {
+                padding: 0 5%;
+            }
+
+            .nav-btn {
+                padding: 8px 14px;
+                font-size: 11px;
+            }
+
+            section {
+                padding:
+                    70px 5%;
+            }
+
+            .hero {
+                padding-left: 5%;
+                padding-right: 5%;
+            }
+
+            .hero h1 {
+                font-size: 55px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+            }
+
+            .showcase-main {
+                padding: 30px;
+            }
+
+            .showcase-main h3 {
+                font-size: 28px;
+            }
+
+            .cta {
+                margin-left: 5%;
+                margin-right: 5%;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVBAR
+    ========================= -->
+
+    <header class="navbar">
+
+        <div class="logo">
+            UZ<span>COOL</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#explore">Explore</a>
+        </nav>
+
+        <button
+            class="nav-btn"
+            onclick="showMessage()"
+        >
+            ENTER →
+        </button>
+
+    </header>
+
+
+    <!-- =========================
+         HERO
+    ========================= -->
+
+    <main>
+
+        <section
+            class="hero"
+            id="home"
+        >
+
+            <div class="orbit"></div>
+            <div class="orbit orbit-two"></div>
+
+            <div class="hero-content">
+
+                <div class="eyebrow">
+
+                    <span class="dot"></span>
+
+                    SYSTEM ONLINE · 2088
+
+                </div>
+
+                <h1>
+                    <span>UZCOOL</span>
+                </h1>
+
+                <p class="hero-subtitle">
+
+                    Welcome to a new digital dimension.
+                    UZCOOL is a futuristic space where
+                    creativity, technology, and imagination
+                    collide.
+
+                </p>
+
+                <div class="hero-actions">
+
+                    <button
+                        class="btn-primary"
+                        onclick="scrollToSection('features')"
+                    >
+                        EXPLORE UZCOOL
+                    </button>
+
+                    <button
+                        class="btn-secondary"
+                        onclick="showMessage()"
+                    >
+                        SYSTEM INFO
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             ABOUT
+        ========================= -->
+
+        <section id="about">
+
+            <div class="section-head">
+
+                <div class="section-label">
+                    01 / ABOUT
+                </div>
+
+                <h2>
+                    Designed for the
+                    <span style="color:#00f0ff;">
+                        next generation.
+                    </span>
+                </h2>
+
+                <p>
+                    UZCOOL menggabungkan estetika futuristik
+                    dengan pengalaman digital yang modern.
+                    Setiap elemen dirancang untuk memberikan
+                    kesan teknologi, eksplorasi, dan kreativitas.
+                </p>
+
+            </div>
+
+
+            <div class="showcase">
+
+                <div class="showcase-main">
+
+                    <div>
+
+                        <div class="section-label">
+                            UZCOOL CORE
+                        </div>
+
+                        <h3>
+                            THE FUTURE
+                            <span>IS NOW.</span>
+                        </h3>
+
+                        <p>
+                            Sebuah identitas digital yang
+                            berani, eksperimental, dan
+                            futuristik. UZCOOL bukan sekadar
+                            sebuah nama, tetapi sebuah
+                            pengalaman visual.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="btn-primary"
+                        onclick="showMessage()"
+                    >
+                        CONNECT →
+                    </button>
+
+                </div>
+
+
+                <div class="showcase-side">
+
+                    <div class="mini-card">
+
+                        <div class="feature-number">
+                            CORE_01
+                        </div>
+
+                        <h3>
+                            CREATIVE
+                        </h3>
+
+                        <p>
+                            Ide bebas tanpa batas dengan
+                            pendekatan visual eksperimental.
+                        </p>
+
+                    </div>
+
+                    <div class="mini-card">
+
+                        <div class="feature-number">
+                            CORE_02
+                        </div>
+
+                        <h3>
+                            DIGITAL
+                        </h3>
+
+                        <p>
+                            Dibangun untuk ekosistem digital
+                            dan generasi teknologi masa depan.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             FEATURES
+        ========================= -->
+
+        <section id="features">
+
+            <div class="section-head">
+
+                <div class="section-label">
+                    02 / FEATURES
+                </div>
+
+                <h2>
+                    Inside the
+                    <span style="color:#00f0ff;">
+                        system.
+                    </span>
+                </h2>
+
+                <p>
+                    Jelajahi karakter utama dari pengalaman
+                    UZCOOL.
+                </p>
+
+            </div>
+
+
+            <div class="features">
+
+                <div class="feature-card">
+
+                    <div class="feature-number">
+                        001
+                    </div>
+
+                    <div class="feature-icon">
+                        ◈
+                    </div>
+
+                    <h3>
+                        FUTURISTIC UI
+                    </h3>
+
+                    <p>
+                        Antarmuka dengan dark mode,
+                        neon glow, grid digital,
+                        dan glass effect.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <div class="feature-number">
+                        002
+                    </div>
+
+                    <div class="feature-icon">
+                        ◎
+                    </div>
+
+                    <h3>
+                        SMART EXPERIENCE
+                    </h3>
+
+                    <p>
+                        Interaksi yang sederhana,
+                        cepat, responsif, dan
+                        mudah digunakan.
+                    </p>
+
+                </div>
+
+
+                <div class="feature-card">
+
+                    <div class="feature-number">
+                        003
+                    </div>
+
+                    <div class="feature-icon">
+                        ✦
+                    </div>
+
+                    <h3>
+                        NEXT LEVEL
+                    </h3>
+
+                    <p>
+                        Visual yang dibuat untuk
+                        memberikan kesan teknologi
+                        masa depan.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             EXPLORE
+        ========================= -->
+
+        <section id="explore">
+
+            <div class="section-head">
+
+                <div class="section-label">
+                    03 / EXPLORE
+                </div>
+
+                <h2>
+                    Enter the
+                    <span style="color:#00f0ff;">
+                        UZCOOL universe.
+                    </span>
+                </h2>
+
+            </div>
+
+
+            <div class="showcase">
+
+                <div class="showcase-main">
+
+                    <div>
+
+                        <div class="section-label">
+                            MODULE 01
+                        </div>
+
+                        <h3>
+                            CREATE.
+                            <span>EXPLORE.</span>
+                            REPEAT.
+                        </h3>
+
+                        <p>
+                            Gunakan UZCOOL sebagai pusat
+                            identitas untuk portfolio,
+                            komunitas, produk digital,
+                            e-book, aplikasi, atau
+                            creative project.
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="btn-primary"
+                        onclick="showMessage()"
+                    >
+                        INITIALIZE
+                    </button>
+
+                </div>
+
+
+                <div class="showcase-side">
+
+                    <div class="mini-card">
+
+                        <div class="feature-number">
+                            MODULE_02
+                        </div>
+
+                        <h3>
+                            CREATE
+                        </h3>
+
+                        <p>
+                            Bangun sesuatu yang berbeda
+                            dan berani.
+                        </p>
+
+                    </div>
+
+                    <div class="mini-card">
+
+                        <div class="feature-number">
+                            MODULE_03
+                        </div>
+
+                        <h3>
+                            DISCOVER
+                        </h3>
+
+                        <p>
+                            Temukan kemungkinan baru
+                            dalam dunia digital.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CTA
+        ========================= -->
+
+        <div class="cta">
+
+            <div class="section-label">
+                SYSTEM READY
+            </div>
+
+            <h2>
+                ARE YOU READY?
+            </h2>
+
+            <p>
+                Masa depan tidak menunggu.
+                Mulai eksplorasi bersama UZCOOL.
+            </p>
+
+            <button
+                class="btn-primary"
+                onclick="showMessage()"
+            >
+                START EXPERIENCE →
+            </button>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer>
+
+        <strong>
+            UZCOOL
+        </strong>
+
+        <span>
+            © 2088 UZCOOL DIGITAL SYSTEM
+        </span>
+
+        <span>
+            FUTURE STARTS HERE.
+        </span>
+
+    </footer>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+        function scrollToSection(id) {
+
+            const section =
+                document.getElementById(id);
+
+            section.scrollIntoView({
+                behavior: "smooth"
+            });
+
+        }
+
+
+        function showMessage() {
+
+            alert(
+                "UZCOOL SYSTEM\n\n" +
+                "STATUS: ONLINE\n" +
+                "CORE: ACTIVE\n" +
+                "VERSION: 2088.01\n\n" +
+                "Welcome to the future."
+            );
+
+        }
+
+
+        /* Scroll reveal */
+
+        const cards =
+            document.querySelectorAll(
+                ".feature-card, .showcase-main, .showcase-side"
+            );
+
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(entry => {
+
+                        if (entry.isIntersecting) {
+
+                            entry.target.style.opacity = "1";
+
+                            entry.target.style.transform =
+                                "translateY(0)";
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: .15
+                }
+            );
+
+
+        cards.forEach(card => {
+
+            card.style.opacity = "0";
+
+            card.style.transform =
+                "translateY(30px)";
+
+            card.style.transition =
+                "opacity .8s ease, transform .8s ease";
+
+            observer.observe(card);
+
+        });
+
+    </script>
+
+</body>
+</html>
+```
