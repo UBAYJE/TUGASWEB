@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinguaQuest - World Translator Game</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            game: {
+              bg: '#070a12',
+              panel: '#101728',
+              border: '#222f47',
+              cyan: '#06b6d4',
+              pink: '#ec4899',
+              purple: '#8b5cf6',
+              gold: '#f59e0b',
+              green: '#10b981'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            game: ['Fredoka', 'cursive', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <!-- GSAP & Canvas Confetti -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #070a12;
+      color: #f8fafc;
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    .font-game {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+
+    /* Glassmorphism Panel */
+    .glass-panel {
+      background: rgba(16, 23, 40, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 3D Button Effects */
+    .btn-3d {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 6px 0 var(--tw-shadow-color, #0f172a);
+    }
+    .btn-3d:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 var(--tw-shadow-color, #0f172a);
+    }
+    .btn-3d:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 var(--tw-shadow-color, #0f172a) !important;
+    }
+
+    /* Floating Keyframe Animation */
+    @keyframes floatMascot {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(3deg); }
+    }
+    .animate-float {
+      animation: floatMascot 3.5s ease-in-out infinite;
+    }
+
+    /* Pulse Glow FX */
+    .neon-pulse {
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.45);
+    }
+
+    /* Floating Score Text Effect */
+    .floating-text {
+      position: absolute;
+      pointer-events: none;
+      font-family: 'Fredoka', sans-serif;
+      font-weight: bold;
+      font-size: 1.5rem;
+      animation: floatUp 1s ease-out forwards;
+      z-index: 100;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.8); }
+      50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1); }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #070a12; }
+    ::-webkit-scrollbar-thumb { background: #222f47; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8b5cf6; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-purple-500 selection:text-white">
+
+  <!-- Background Particle Canvas -->
+  <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-25"></canvas>
+
+  <div id="appContainer" class="relative z-10 max-w-5xl w-full mx-auto p-3 sm:p-5 flex flex-col min-h-screen">
+    
+    <!-- TOP NAVIGATION & PLAYER STATS -->
+    <header class="w-full flex flex-wrap items-center justify-between gap-3 py-3 px-4 glass-panel rounded-2xl mb-4 border-slate-700/60">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="showHomeScreen()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-purple-500/30">
+          <i class="fa-solid fa-gamepad text-xl text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-game font-bold text-white tracking-wide flex items-center gap-2">
+            Lingua<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Quest</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-sans">100 Level</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Player Stats Display -->
+      <div class="flex items-center gap-2 sm:gap-3 text-xs md:text-sm font-bold">
+        <!-- Coins -->
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+          <i class="fa-solid fa-coins text-amber-400 animate-bounce"></i>
+          <span id="playerCoins">0</span>
+        </div>
+        <!-- Total Stars -->
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-300">
+          <i class="fa-solid fa-star text-yellow-400"></i>
+          <span id="playerStars">0/300</span>
+        </div>
+        <!-- Achievements Modal Button -->
+        <button onclick="openAchievementsModal()" class="w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700 text-amber-400 flex items-center justify-center hover:bg-slate-700 transition" title="Pencapaian">
+          <i class="fa-solid fa-trophy"></i>
+        </button>
+        <!-- Sound Toggle -->
+        <button id="soundBtn" onclick="toggleSound()" class="w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300 flex items-center justify-center hover:bg-slate-700 transition" title="Suara Musik & FX">
+          <i id="soundIcon" class="fa-solid fa-volume-high text-purple-400"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW 1: HOME SCREEN & WORLD LEVEL SELECTOR -->
+    <main id="homeScreen" class="flex-1 flex flex-col gap-6">
+      
+      <!-- Hero Banner & Mascot Showcase -->
+      <div class="glass-panel rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border-purple-500/20">
+        <div class="space-y-3 max-w-lg z-10 text-center md:text-left">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-semibold">
+            <i class="fa-solid fa-fire text-amber-400"></i> Petualangan Penerjemah Bahasa Terlengkap
+          </div>
+          <h2 class="text-3xl md:text-4xl font-game font-bold text-white leading-tight">
+            Kuasai <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500">4 Bahasa World Quest</span>!
+          </h2>
+          <p class="text-slate-400 text-sm">
+            Tantang dirimu menerjemahkan Bahasa Indonesia ke <strong>Inggris 🇬🇧, Jepang 🇯🇵, Korea 🇰🇷, dan Mandarin 🇨🇳</strong>. Selesaikan kuis, susun balok kata, hingga duel lawan Boss!
+          </p>
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+            <button onclick="startNextUnlockedLevel()" class="btn-3d px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white font-game text-base shadow-purple-900 border border-purple-400/40 flex items-center gap-2">
+              <i class="fa-solid fa-play"></i> MAIN LEVEL SEKARANG
+            </button>
+            <button onclick="openShopModal()" class="btn-3d px-5 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-game text-sm shadow-slate-950 border border-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-store text-amber-400"></i> Toko Maskot
+            </button>
+          </div>
+        </div>
+
+        <!-- Mascot Display Card -->
+        <div class="relative flex-shrink-0 z-10">
+          <div class="w-36 h-36 md:w-44 md:h-44 rounded-3xl bg-slate-900/90 border-2 border-purple-500/40 flex flex-col items-center justify-center text-6xl shadow-2xl neon-pulse animate-float cursor-pointer" onclick="openShopModal()" title="Klik untuk ganti maskot!">
+            <span id="heroMascotDisplay">🐱</span>
+          </div>
+          <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-game text-xs rounded-full shadow-lg border border-purple-300/40 whitespace-nowrap" id="mascotNameTag">
+            Neko Polyglot
+          </div>
+        </div>
+      </div>
+
+      <!-- World Map Section -->
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <h3 class="text-lg font-game text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot text-cyan-400"></i> Peta Level Dunia
+          </h3>
+          <div id="worldTabs" class="flex gap-2 overflow-x-auto py-1 max-w-full">
+            <!-- Dynamic World Tabs -->
+          </div>
+        </div>
+
+        <!-- Level Grid Container -->
+        <div id="levelGrid" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 gap-3 pb-8">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </main>
+
+    <!-- VIEW 2: GAMEPLAY ARENA -->
+    <main id="gameplayScreen" class="hidden flex-1 flex-col gap-4">
+      
+      <!-- Gameplay Header Bar -->
+      <div class="glass-panel rounded-2xl p-3 sm:p-4 flex items-center justify-between border-slate-700/60">
+        <button onclick="confirmExitLevel()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 flex items-center justify-center transition">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <div class="text-center">
+          <span id="gameLevelBadge" class="text-xs font-bold uppercase tracking-wider text-purple-400">LEVEL 1</span>
+          <h3 id="gameWorldTitle" class="text-base font-game text-white">Dunia 1: Pemula Polos</h3>
+        </div>
+
+        <!-- Health / Hearts Container -->
+        <div class="flex items-center gap-1" id="heartContainer">
+          <!-- Dynamic Hearts -->
+        </div>
+      </div>
+
+      <!-- Progress Bar, Timer, Combo & Score -->
+      <div class="glass-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 border-slate-800">
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-400 min-w-[70px]" id="timerLabel">
+          <i class="fa-solid fa-clock text-cyan-400"></i> 30s
+        </div>
+        
+        <div class="flex-1 h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800 relative min-w-[150px]">
+          <div id="timerBar" class="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 transition-all duration-300" style="width: 100%;"></div>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs font-bold">
+          <span id="comboBadge" class="hidden px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-400 border border-pink-500/40 animate-pulse">
+            🔥 Combo 2x
+          </span>
+          <span class="text-amber-400 flex items-center gap-1 text-sm">
+            <i class="fa-solid fa-bolt"></i> Skor: <strong id="currentScore">0</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Boss HP Bar (Visible only on Boss Levels) -->
+      <div id="bossHpContainer" class="hidden glass-panel rounded-2xl p-3 flex flex-col gap-1 border-rose-500/40">
+        <div class="flex justify-between text-xs font-bold text-rose-400">
+          <span><i class="fa-solid fa-skull"></i> BOSS PENERJEMAH: <strong id="bossName">Dragon Polyglot</strong></span>
+          <span id="bossHpText">100 / 100 HP</span>
+        </div>
+        <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-rose-900">
+          <div id="bossHpBar" class="h-full bg-gradient-to-r from-rose-600 to-amber-500 transition-all duration-300" style="width: 100%;"></div>
+        </div>
+      </div>
+
+      <!-- Question & Mascot Arena Card -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden border-purple-500/30">
+        
+        <!-- Target Language Flag Badge -->
+        <div id="targetLangBadge" class="px-4 py-1.5 rounded-full bg-slate-900/90 border border-purple-500/40 text-purple-300 text-xs font-bold flex items-center gap-2 mb-3 shadow-md">
+          <span>🇬🇧</span> Terjemahkan ke: English
+        </div>
+
+        <!-- Mascot Mood Avatar -->
+        <div id="gameMascotMood" class="text-5xl mb-2 animate-bounce cursor-pointer" onclick="speakPromptText()">
+          🐱
+        </div>
+
+        <!-- Indonesian Text Prompt -->
+        <h2 id="indonesianPrompt" class="text-2xl sm:text-3xl font-game font-bold text-white mb-1">
+          "Selamat Pagi!"
+        </h2>
+        <p id="promptHint" class="text-xs text-slate-400 italic mb-3">Pilih atau susun terjemahan yang tepat di bawah ini</p>
+
+        <!-- TTS Listen Button -->
+        <button onclick="speakPromptText()" class="px-3.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-2 transition hover:text-cyan-400">
+          <i class="fa-solid fa-volume-high text-cyan-400"></i> Dengarkan Pelafalan Bahasa
+        </button>
+      </div>
+
+      <!-- INTERACTIVE ANSWER AREA (Dynamic per Mode) -->
+      <div id="answerAreaContainer" class="flex-1 flex flex-col gap-4 min-h-[180px]">
+        
+        <!-- MODE A: Word Tile Assembler -->
+        <div id="tileModeBox" class="flex flex-col gap-4">
+          <!-- Selected Tiles Output Box -->
+          <div id="selectedTilesBox" class="min-h-[72px] p-4 glass-panel rounded-2xl flex flex-wrap items-center justify-center gap-2 border-dashed border-purple-500/50">
+            <span class="text-xs text-slate-500 italic" id="tilePlaceholder">Ketuk balok kata di bawah untuk menyusun kalimat...</span>
+          </div>
+
+          <!-- Available Word Bank -->
+          <div id="wordBankBox" class="flex flex-wrap items-center justify-center gap-2.5 p-2">
+            <!-- Tiles Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- MODE B: Multiple Choice Quiz -->
+        <div id="choiceModeBox" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Choice Buttons Rendered via JS -->
+        </div>
+
+        <!-- MODE C: Flash Memory Match -->
+        <div id="matchModeBox" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <!-- Memory Cards Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- POWERUPS & SUBMIT CONTROL BAR -->
+      <div class="glass-panel rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 border-slate-800">
+        <!-- Powerups -->
+        <div class="flex items-center gap-2">
+          <button onclick="useHintPowerup()" id="btnPowerupHint" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 text-xs font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-lightbulb"></i> Petunjuk <span class="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-slate-300" id="hintStock">3</span>
+          </button>
+          <button onclick="useFreezePowerup()" id="btnPowerupFreeze" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-400 text-xs font-bold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-snowflake"></i> Bekukan <span class="text-[10px] bg-slate-900 px-1.5 py-0.5 rounded text-slate-300" id="freezeStock">2</span>
+          </button>
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submitAnswerBtn" onclick="checkCurrentAnswer()" class="btn-3d px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white font-game text-sm shadow-purple-900 border border-purple-400/30 flex items-center gap-2">
+          <i class="fa-solid fa-check"></i> PERIKSA JAWABAN
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- MODAL 1: VICTORY / LEVEL COMPLETE -->
+  <div id="victoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-md w-full rounded-3xl p-6 text-center flex flex-col items-center gap-4 border-purple-500/40 relative overflow-hidden">
+      <div class="w-20 h-20 rounded-full bg-purple-600/30 border-2 border-purple-400 flex items-center justify-center text-4xl mb-1 animate-bounce">
+        🎉
+      </div>
+      <h2 class="text-2xl font-game font-bold text-white">LEVEL SELESAI!</h2>
+      <p class="text-xs text-purple-300" id="victoryLevelText">Kamu berhasil menyelesaikan Level 1!</p>
+
+      <!-- Stars Display -->
+      <div class="flex items-center gap-3 text-4xl my-2" id="victoryStarsBox">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Score Breakdown -->
+      <div class="w-full bg-slate-900/80 rounded-2xl p-4 border border-slate-800 space-y-2 text-xs">
+        <div class="flex justify-between text-slate-400">
+          <span>Skor Jawaban:</span>
+          <span class="font-bold text-white" id="victoryBaseScore">+100</span>
+        </div>
+        <div class="flex justify-between text-slate-400">
+          <span>Bonus Sisa Waktu:</span>
+          <span class="font-bold text-cyan-400" id="victoryTimeBonus">+40</span>
+        </div>
+        <div class="flex justify-between text-slate-400 border-t border-slate-800 pt-2">
+          <span>Koin Dihasilkan:</span>
+          <span class="font-bold text-amber-400 flex items-center gap-1"><i class="fa-solid fa-coins"></i> <span id="victoryCoinsGained">+15</span></span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3 w-full pt-2">
+        <button onclick="showHomeScreen()" class="flex-1 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-game text-sm border border-slate-700">
+          <i class="fa-solid fa-map"></i> Peta Level
+        </button>
+        <button onclick="playNextLevelFromVictory()" class="flex-1 btn-3d py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-game text-sm shadow-purple-900 border border-purple-400/30">
+          Lanjut Level <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: DEFEAT / GAME OVER -->
+  <div id="defeatModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-md w-full rounded-3xl p-6 text-center flex flex-col items-center gap-4 border-rose-500/40">
+      <div class="w-20 h-20 rounded-full bg-rose-600/20 border-2 border-rose-500 flex items-center justify-center text-4xl mb-1">
+        💔
+      </div>
+      <h2 class="text-2xl font-game font-bold text-white">NYAWA HABIS / WAKTU HABIS!</h2>
+      <p class="text-xs text-slate-400">Jangan berkecil hati! Menguasai bahasa butuh latihan yang berulang.</p>
+
+      <div class="flex items-center gap-3 w-full pt-4">
+        <button onclick="showHomeScreen()" class="flex-1 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-game text-sm border border-slate-700">
+          <i class="fa-solid fa-map"></i> Peta Level
+        </button>
+        <button onclick="restartCurrentLevel()" class="flex-1 btn-3d py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-game text-sm shadow-rose-900 border border-rose-400/30">
+          Coba Lagi <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: MASCOT AVATAR SHOP -->
+  <div id="shopModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-lg w-full rounded-3xl p-6 flex flex-col gap-4 border-amber-500/40 relative max-h-[90vh] overflow-hidden">
+      
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-xl font-game text-white flex items-center gap-2">
+          <i class="fa-solid fa-store text-amber-400"></i> Toko Maskot Bahasa
+        </h3>
+        <button onclick="closeShopModal()" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto pr-1 grid grid-cols-2 gap-3" id="shopItemsContainer">
+        <!-- Rendered Shop Avatars -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: ACHIEVEMENTS MODAL -->
+  <div id="achievementsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-md w-full rounded-3xl p-6 flex flex-col gap-4 border-purple-500/40 relative max-h-[85vh] overflow-hidden">
+      
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-xl font-game text-white flex items-center gap-2">
+          <i class="fa-solid fa-trophy text-amber-400"></i> Pencapaian & Lencana
+        </h3>
+        <button onclick="closeAchievementsModal()" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto space-y-3 pr-1" id="achievementsList">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT GAME LOGIC -->
+  <script>
+    /* ==========================================================================
+       1. SOUND SYNTHESIZER & AUDIO SYSTEM
+       ========================================================================== */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let soundEnabled = true;
+
+    function playAudioTone(freq, type = 'sine', duration = 0.1, delay = 0) {
+      if (!soundEnabled) return;
+      setTimeout(() => {
+        try {
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+      }, delay);
+    }
+
+    function playSoundCorrect() {
+      playAudioTone(523.25, 'triangle', 0.1, 0);   // C5
+      playAudioTone(659.25, 'triangle', 0.1, 80);  // E5
+      playAudioTone(783.99, 'triangle', 0.2, 160); // G5
+    }
+
+    function playSoundWrong() {
+      playAudioTone(220, 'sawtooth', 0.15, 0);
+      playAudioTone(180, 'sawtooth', 0.2, 120);
+    }
+
+    function playSoundClick() {
+      playAudioTone(700, 'sine', 0.05);
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').className = soundEnabled ? 
+        "fa-solid fa-volume-high text-purple-400" : "fa-solid fa-volume-xmark text-slate-500";
+    }
+
+    /* ==========================================================================
+       2. SAVE SYSTEM & GAME STATE
+       ========================================================================== */
+    const GAME_STORAGE_KEY = "LinguaQuest_SaveData_v2";
+
+    let state = {
+      playerLevel: 1,
+      coins: 80,
+      hintStock: 3,
+      freezeStock: 2,
+      activeAvatar: '🐱',
+      activeAvatarName: 'Neko Polyglot',
+      unlockedAvatars: ['🐱'],
+      levelsData: {}, // levelId: { stars: 0, highScore: 0 }
+      achievements: ['first_step']
+    };
+
+    function loadSaveData() {
+      const saved = localStorage.getItem(GAME_STORAGE_KEY);
+      if (saved) {
+        try {
+          state = { ...state, ...JSON.parse(saved) };
+        } catch (e) { console.error("Load save error", e); }
+      }
+      updateTopBarUI();
+    }
+
+    function saveGameData() {
+      localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(state));
+      updateTopBarUI();
+    }
+
+    function updateTopBarUI() {
+      document.getElementById('playerCoins').textContent = state.coins;
+      
+      let totalStars = 0;
+      Object.values(state.levelsData).forEach(lvl => {
+        totalStars += (lvl.stars || 0);
+      });
+      document.getElementById('playerStars').textContent = `${totalStars}/300`;
+      document.getElementById('hintStock').textContent = state.hintStock;
+      document.getElementById('freezeStock').textContent = state.freezeStock;
+      document.getElementById('heroMascotDisplay').textContent = state.activeAvatar;
+      document.getElementById('mascotNameTag').textContent = state.activeAvatarName;
+    }
+
+    /* ==========================================================================
+       3. 100 LEVEL GENERATOR DATABASE
+       ========================================================================== */
+    const WORLDS = [
+      { id: 1, name: "Pemula Polos", range: [1, 25], color: "text-cyan-400" },
+      { id: 2, name: "Percakapan Harian", range: [26, 50], color: "text-purple-400" },
+      { id: 3, name: "Jelajah Budaya", range: [51, 75], color: "text-pink-400" },
+      { id: 4, name: "Polyglot Master", range: [76, 100], color: "text-amber-400" }
+    ];
+
+    const rawPhraseBank = [
+      // World 1 Phrases
+      { id: "Halo", en: "Hello", ja: "Konnichiwa", ko: "Annyeong", zh: "Ni hao" },
+      { id: "Terima Kasih", en: "Thank you", ja: "Arigatou", ko: "Gamsahabnida", zh: "Xiexie" },
+      { id: "Selamat Pagi", en: "Good morning", ja: "Ohayou", ko: "Joeun achim", zh: "Zaoshang hao" },
+      { id: "Sampai Jumpa", en: "Goodbye", ja: "Sayounara", ko: "Annyeonghi gaseyo", zh: "Zaijian" },
+      { id: "Ya dan Tidak", en: "Yes and No", ja: "Hai to Iie", ko: "Ne wa Aniyo", zh: "Shi he Bu" },
+      { id: "Saya Cinta Kamu", en: "I love you", ja: "Aishiteru", ko: "Saranghae", zh: "Wo ai ni" },
+      { id: "Maafkan Saya", en: "I am sorry", ja: "Gomen nasai", ko: "Mianhaeyo", zh: "Duibuqi" },
+      { id: "Apa Kabar?", en: "How are you?", ja: "Ogenki desu ka?", ko: "Eotteohge jinaeseyo?", zh: "Ni hao ma?" },
+      { id: "Kucing Lucu", en: "Cute cat", ja: "Kawaii neko", ko: "Gwiyeowon goyang-i", zh: "Ke'ai de mao" },
+      { id: "Air Minum", en: "Drinking water", ja: "Nomimono mizu", ko: "Maseul mul", zh: "Yinyong shui" },
+      
+      // World 2 Phrases
+      { id: "Berapa harganya?", en: "How much is this?", ja: "Kore wa ikura desu ka?", ko: "Igeos-eun eolma-eyo?", zh: "Zhege duoshao qian?" },
+      { id: "Dimana toiletnya?", en: "Where is the bathroom?", ja: "Toire wa doko desu ka?", ko: "Hwajangsil-i eodi-eyo?", zh: "Cewosuo zai nali?" },
+      { id: "Saya ingin makan sushi", en: "I want to eat sushi", ja: "Sushi ga tabetai desu", ko: "Sushileul meoggo sip-eoyo", zh: "Wo xiang chi shousi" },
+      { id: "Hari ini sangat cerah", en: "Today is very sunny", ja: "Kyou wa ii tenki desu", ko: "Oneul nalssiga joh-ayo", zh: "Jintian tianqi hen hao" },
+      { id: "Bisakah kamu bicara bahasa Inggris?", en: "Can you speak English?", ja: "Eigo ga hanasemasu ka?", ko: "Yeong-eo halsu iss-eoyo?", zh: "Ni hui shuo yingyu ma?" },
+
+      // World 3 & 4 Phrases
+      { id: "Kerja keras membawamu ke sukses", en: "Hard work brings you success", ja: "Doryoku wa seikou wo motarasu", ko: "Nolyeog-eun seong-gong-eul gajyeo-onda", zh: "Nuli dailai chenggong" },
+      { id: "Pengalaman adalah guru terbaik", en: "Experience is the best teacher", ja: "Keiken wa saikou no sensei desu", ko: "Gyeong-heom-eun choego-ui seonsaeng-ida", zh: "Jingyan shi zuihao de laoshi" },
+      { id: "Jangan pernah menyerah pada mimpimu", en: "Never give up on your dreams", ja: "Yume wo akiramenai de", ko: "Kkum-eul pogihaji maseyo", zh: "Buyao fangqi mengxiang" },
+      { id: "Bahasa membuka jendela dunia", en: "Language opens a window to the world", ja: "Gengo wa sekai no mado wo akemasu", ko: "Eon-eoneun segye-ui chang-eul yeol-eojunda", zh: "Yuyan dakai shijie zhi chuang" }
+    ];
+
+    const levelDatabase = [];
+    const targetLangs = [
+      { code: 'en', name: 'English', flag: '🇬🇧', tts: 'en-US' },
+      { code: 'ja', name: 'Jepang (Romaji)', flag: '🇯🇵', tts: 'ja-JP' },
+      { code: 'ko', name: 'Korea (Romaji)', flag: '🇰🇷', tts: 'ko-KR' },
+      { code: 'zh', name: 'Mandarin (Pinyin)', flag: '🇨🇳', tts: 'zh-CN' }
+    ];
+
+    for (let i = 1; i <= 100; i++) {
+      const phraseObj = rawPhraseBank[(i - 1) % rawPhraseBank.length];
+      const langChoice = targetLangs[(i - 1) % targetLangs.length];
+      
+      let mode = 'tile';
+      if (i % 3 === 0) mode = 'choice';
+      if (i % 10 === 0) mode = 'boss'; // Boss levels every 10 levels!
+
+      levelDatabase.push({
+        levelId: i,
+        worldId: i <= 25 ? 1 : (i <= 50 ? 2 : (i <= 75 ? 3 : 4)),
+        indonesian: phraseObj.id,
+        targetLang: langChoice,
+        correctText: phraseObj[langChoice.code],
+        mode: mode,
+        timeLimit: Math.max(15, 35 - Math.floor(i / 5))
+      });
+    }
+
+    /* ==========================================================================
+       4. GAME NAVIGATION & UI CONTROLLER
+       ========================================================================== */
+    let currentLevelData = null;
+    let selectedTiles = [];
+    let selectedChoiceText = "";
+    let activeTimer = null;
+    let timeLeft = 0;
+    let currentScore = 0;
+    let currentLives = 3;
+    let comboCount = 0;
+    let bossHp = 100;
+
+    function showHomeScreen() {
+      clearInterval(activeTimer);
+      document.getElementById('gameplayScreen').classList.add('hidden');
+      document.getElementById('homeScreen').classList.remove('hidden');
+      renderWorldTabs();
+      renderLevelGrid(1);
+    }
+
+    function renderWorldTabs() {
+      const container = document.getElementById('worldTabs');
+      container.innerHTML = WORLDS.map(w => `
+        <button onclick="renderLevelGrid(${w.id})" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-xs font-bold whitespace-nowrap flex items-center gap-1.5 transition">
+          <span class="${w.color}">Dunia ${w.id}</span> (${w.range[0]}-${w.range[1]})
+        </button>
+      `).join('');
+    }
+
+    function renderLevelGrid(worldId) {
+      const world = WORLDS.find(w => w.id === worldId) || WORLDS[0];
+      const container = document.getElementById('levelGrid');
+      container.innerHTML = '';
+
+      for (let i = world.range[0]; i <= world.range[1]; i++) {
+        const isUnlocked = i <= state.playerLevel;
+        const levelData = state.levelsData[i] || { stars: 0 };
+        const isBossLvl = (i % 10 === 0);
+
+        const btn = document.createElement('button');
+        btn.onclick = () => { if (isUnlocked) startLevel(i); };
+
+        if (isUnlocked) {
+          btn.className = `btn-3d p-3 rounded-2xl flex flex-col items-center justify-center gap-1 ${
+            isBossLvl ? 'bg-gradient-to-b from-rose-900 to-slate-800 border-rose-500/60' : 'bg-slate-800/90 border-purple-500/40'
+          } text-white shadow-slate-950 border`;
+          
+          let starsHtml = '';
+          for (let s = 1; s <= 3; s++) {
+            starsHtml += `<i class="fa-solid fa-star ${s <= levelData.stars ? 'text-amber-400' : 'text-slate-700'} text-[10px]"></i>`;
+          }
+
+          btn.innerHTML = `
+            <span class="text-[10px] font-bold text-slate-400">${isBossLvl ? 'BOSS' : 'LVL'}</span>
+            <span class="text-xl font-game font-bold ${isBossLvl ? 'text-rose-400' : 'text-purple-300'}">${i}</span>
+            <div class="flex gap-0.5 mt-0.5">${starsHtml}</div>
+          `;
+        } else {
+          btn.className = `p-3 rounded-2xl flex flex-col items-center justify-center gap-1 bg-slate-900/60 border border-slate-800/80 text-slate-600 cursor-not-allowed opacity-50`;
+          btn.innerHTML = `
+            <i class="fa-solid fa-lock text-xs mb-1"></i>
+            <span class="text-xs font-bold">${i}</span>
+          `;
+        }
+        container.appendChild(btn);
+      }
+    }
+
+    function startNextUnlockedLevel() {
+      startLevel(state.playerLevel);
+    }
+
+    /* ==========================================================================
+       5. GAMEPLAY ARENA ENGINE
+       ========================================================================== */
+    function startLevel(levelId) {
+      currentLevelData = levelDatabase.find(l => l.levelId === levelId);
+      if (!currentLevelData) return;
+
+      selectedTiles = [];
+      selectedChoiceText = "";
+      currentLives = 3;
+      currentScore = 0;
+      comboCount = 0;
+      bossHp = 100;
+      timeLeft = currentLevelData.timeLimit;
+
+      document.getElementById('homeScreen').classList.add('hidden');
+      document.getElementById('gameplayScreen').classList.remove('hidden');
+      document.getElementById('gameplayScreen').classList.add('flex');
+
+      document.getElementById('gameLevelBadge').textContent = `LEVEL ${currentLevelData.levelId}`;
+      const worldObj = WORLDS.find(w => w.id === currentLevelData.worldId);
+      document.getElementById('gameWorldTitle').textContent = `Dunia ${worldObj.id}: ${worldObj.name}`;
+      
+      document.getElementById('targetLangBadge').innerHTML = `<span>${currentLevelData.targetLang.flag}</span> Terjemahkan ke: <strong>${currentLevelData.targetLang.name}</strong>`;
+      document.getElementById('indonesianPrompt').textContent = `"${currentLevelData.indonesian}"`;
+      document.getElementById('currentScore').textContent = '0';
+      document.getElementById('gameMascotMood').textContent = state.activeAvatar;
+      document.getElementById('comboBadge').classList.add('hidden');
+
+      // Boss Mode Setup
+      const bossHpContainer = document.getElementById('bossHpContainer');
+      if (currentLevelData.mode === 'boss') {
+        bossHpContainer.classList.remove('hidden');
+        document.getElementById('bossName').textContent = `Boss Naga Polyglot Lv.${levelId}`;
+        document.getElementById('bossHpBar').style.width = '100%';
+        document.getElementById('bossHpText').textContent = '100 / 100 HP';
+      } else {
+        bossHpContainer.classList.add('hidden');
+      }
+
+      renderHearts();
+      setupLevelMode();
+      startTimer();
+    }
+
+    function renderHearts() {
+      const container = document.getElementById('heartContainer');
+      container.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        if (i < currentLives) {
+          container.innerHTML += `<i class="fa-solid fa-heart text-pink-500 text-lg"></i>`;
+        } else {
+          container.innerHTML += `<i class="fa-regular fa-heart text-slate-600 text-lg"></i>`;
+        }
+      }
+    }
+
+    function startTimer() {
+      clearInterval(activeTimer);
+      const totalTime = currentLevelData.timeLimit;
+      const timerBar = document.getElementById('timerBar');
+      const timerLabel = document.getElementById('timerLabel');
+
+      activeTimer = setInterval(() => {
+        timeLeft--;
+        timerLabel.innerHTML = `<i class="fa-solid fa-clock text-cyan-400"></i> ${timeLeft}s`;
+        const percentage = (timeLeft / totalTime) * 100;
+        timerBar.style.width = `${Math.max(0, percentage)}%`;
+
+        if (timeLeft <= 0) {
+          clearInterval(activeTimer);
+          triggerDefeat();
+        }
+      }, 1000);
+    }
+
+    function setupLevelMode() {
+      const tileBox = document.getElementById('tileModeBox');
+      const choiceBox = document.getElementById('choiceModeBox');
+
+      tileBox.classList.add('hidden');
+      choiceBox.classList.add('hidden');
+
+      if (currentLevelData.mode === 'tile' || currentLevelData.mode === 'boss') {
+        tileBox.classList.remove('hidden');
+        renderWordTiles();
+      } else if (currentLevelData.mode === 'choice') {
+        choiceBox.classList.remove('hidden');
+        renderMultipleChoices();
+      }
+    }
+
+    // MODE 1: TILE BUILDER
+    function renderWordTiles() {
+      const words = currentLevelData.correctText.split(' ');
+      const distractors = ["desu", "ka", "the", "a", "wa", "you", "ni", "hao", "ne"];
+      let allWords = [...words, distractors[Math.floor(Math.random() * distractors.length)]];
+      allWords.sort(() => Math.random() - 0.5);
+
+      const wordBankBox = document.getElementById('wordBankBox');
+      wordBankBox.innerHTML = '';
+      updateSelectedTilesUI();
+
+      allWords.forEach((w, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `btn-3d px-4 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 text-slate-200 font-bold text-sm shadow-slate-950`;
+        btn.textContent = w;
+        btn.onclick = () => {
+          playSoundClick();
+          selectedTiles.push(w);
+          btn.disabled = true;
+          btn.classList.add('opacity-30', 'pointer-events-none');
+          updateSelectedTilesUI();
+        };
+        wordBankBox.appendChild(btn);
+      });
+    }
+
+    function updateSelectedTilesUI() {
+      const container = document.getElementById('selectedTilesBox');
+      if (selectedTiles.length === 0) {
+        container.innerHTML = `<span class="text-xs text-slate-500 italic" id="tilePlaceholder">Ketuk balok kata di bawah untuk menyusun kalimat...</span>`;
+        return;
+      }
+
+      container.innerHTML = selectedTiles.map((w, idx) => `
+        <button onclick="removeSelectedTile(${idx})" class="px-3 py-2 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-md border border-purple-400 flex items-center gap-1.5 animate-pop">
+          ${w} <i class="fa-solid fa-xmark text-xs text-purple-200"></i>
+        </button>
+      `).join('');
+    }
+
+    function removeSelectedTile(index) {
+      playSoundClick();
+      const removed = selectedTiles.splice(index, 1)[0];
+      
+      const buttons = document.querySelectorAll('#wordBankBox button');
+      for (let btn of buttons) {
+        if (btn.textContent === removed && btn.disabled) {
+          btn.disabled = false;
+          btn.classList.remove('opacity-30', 'pointer-events-none');
+          break;
+        }
+      }
+      updateSelectedTilesUI();
+    }
+
+    // MODE 2: MULTIPLE CHOICE
+    function renderMultipleChoices() {
+      const choiceBox = document.getElementById('choiceModeBox');
+      choiceBox.innerHTML = '';
+      selectedChoiceText = "";
+
+      const choices = [currentLevelData.correctText];
+      while (choices.length < 4) {
+        const randomItem = rawPhraseBank[Math.floor(Math.random() * rawPhraseBank.length)];
+        const alt = randomItem[currentLevelData.targetLang.code];
+        if (alt && !choices.includes(alt)) choices.push(alt);
+      }
+      choices.sort(() => Math.random() - 0.5);
+
+      choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = `choice-option-btn p-4 rounded-2xl bg-slate-800/90 border border-slate-700 text-slate-200 font-bold text-sm text-left hover:border-purple-500 transition shadow-lg flex items-center gap-3`;
+        btn.innerHTML = `<div class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-xs text-slate-400 font-mono">?</div> <span>${choice}</span>`;
+        btn.onclick = () => {
+          playSoundClick();
+          document.querySelectorAll('.choice-option-btn').forEach(b => {
+            b.classList.remove('border-purple-500', 'bg-purple-900/30');
+          });
+          btn.classList.add('border-purple-500', 'bg-purple-900/30');
+          selectedChoiceText = choice;
+        };
+        choiceBox.appendChild(btn);
+      });
+    }
+
+    /* ==========================================================================
+       6. ANSWER VERIFICATION & BOSS FIGHT ENGINE
+       ========================================================================== */
+    function checkCurrentAnswer() {
+      let userStr = "";
+      if (currentLevelData.mode === 'tile' || currentLevelData.mode === 'boss') {
+        userStr = selectedTiles.join(' ').trim();
+      } else if (currentLevelData.mode === 'choice') {
+        userStr = selectedChoiceText;
+      }
+
+      const targetStr = currentLevelData.correctText.trim();
+
+      if (userStr.toLowerCase() === targetStr.toLowerCase()) {
+        // CORRECT ANSWER
+        playSoundCorrect();
+        comboCount++;
+        currentScore += 100 * comboCount;
+        document.getElementById('currentScore').textContent = currentScore;
+
+        if (comboCount > 1) {
+          const badge = document.getElementById('comboBadge');
+          badge.textContent = `🔥 Combo ${comboCount}x`;
+          badge.classList.remove('hidden');
+        }
+
+        if (currentLevelData.mode === 'boss') {
+          bossHp -= 100; // Defeat boss instantly on correct translated spell!
+          document.getElementById('bossHpBar').style.width = '0%';
+          document.getElementById('bossHpText').textContent = '0 / 100 HP';
+        }
+
+        triggerVictory();
+      } else {
+        // WRONG ANSWER
+        playSoundWrong();
+        comboCount = 0;
+        document.getElementById('comboBadge').classList.add('hidden');
+        
+        currentLives--;
+        renderHearts();
+
+        // Shake gameplay screen
+        gsap.to("#gameplayScreen", { x: 8, duration: 0.05, repeat: 5, yoyo: true });
+
+        if (currentLives <= 0) {
+          clearInterval(activeTimer);
+          triggerDefeat();
+        }
+      }
+    }
+
+    function triggerVictory() {
+      clearInterval(activeTimer);
+
+      let stars = 1;
+      if (currentLives === 3) stars = 3;
+      else if (currentLives === 2) stars = 2;
+
+      const timeBonus = timeLeft * 2;
+      const coinsGained = 12 + (stars * 5);
+
+      state.coins += coinsGained;
+      if (currentLevelData.levelId >= state.playerLevel) {
+        state.playerLevel = currentLevelData.levelId + 1;
+      }
+
+      const prevStars = state.levelsData[currentLevelData.levelId]?.stars || 0;
+      state.levelsData[currentLevelData.levelId] = {
+        stars: Math.max(prevStars, stars),
+        highScore: currentScore + timeBonus
+      };
+
+      saveGameData();
+
+      // Confetti Effect
+      confetti({
+        particleCount: 85,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4']
+      });
+
+      // Update Victory Modal UI
+      document.getElementById('victoryLevelText').textContent = `Kamu berhasil menaklukkan Level ${currentLevelData.levelId}!`;
+      document.getElementById('victoryBaseScore').textContent = `+${currentScore}`;
+      document.getElementById('victoryTimeBonus').textContent = `+${timeBonus}`;
+      document.getElementById('victoryCoinsGained').textContent = `+${coinsGained}`;
+
+      const starsBox = document.getElementById('victoryStarsBox');
+      starsBox.innerHTML = '';
+      for (let s = 1; s <= 3; s++) {
+        starsBox.innerHTML += `<i class="fa-solid fa-star ${s <= stars ? 'text-amber-400 scale-110' : 'text-slate-700'} transition-transform duration-300"></i>`;
+      }
+
+      document.getElementById('victoryModal').classList.remove('hidden');
+    }
+
+    function triggerDefeat() {
+      document.getElementById('defeatModal').classList.remove('hidden');
+    }
+
+    function playNextLevelFromVictory() {
+      document.getElementById('victoryModal').classList.add('hidden');
+      startLevel(currentLevelData.levelId + 1);
+    }
+
+    function restartCurrentLevel() {
+      document.getElementById('defeatModal').classList.add('hidden');
+      startLevel(currentLevelData.levelId);
+    }
+
+    function confirmExitLevel() {
+      clearInterval(activeTimer);
+      showHomeScreen();
+    }
+
+    /* ==========================================================================
+       7. POWERUPS & TTS VOICE SYSTEM
+       ========================================================================== */
+    function useHintPowerup() {
+      if (state.hintStock <= 0) return;
+      state.hintStock--;
+      saveGameData();
+
+      playSoundClick();
+      if (currentLevelData.mode === 'tile' || currentLevelData.mode === 'boss') {
+        const words = currentLevelData.correctText.split(' ');
+        if (words.length > 0 && selectedTiles.length === 0) {
+          selectedTiles.push(words[0]);
+          updateSelectedTilesUI();
+        }
+      }
+    }
+
+    function useFreezePowerup() {
+      if (state.freezeStock <= 0) return;
+      state.freezeStock--;
+      saveGameData();
+
+      playSoundClick();
+      timeLeft += 10;
+    }
+
+    function speakPromptText() {
+      if (!currentLevelData) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(currentLevelData.indonesian);
+      u.lang = 'id-ID';
+      window.speechSynthesis.speak(u);
+    }
+
+    /* ==========================================================================
+       8. SHOP & MASCOT CUSTOMIZATION
+       ========================================================================== */
+    const AVATAR_SHOP = [
+      { emoji: '🐱', name: 'Neko Polyglot', price: 0 },
+      { emoji: '🦊', name: 'Kitsune Sensei', price: 50 },
+      { emoji: '🐼', name: 'Panda Hanzi', price: 100 },
+      { emoji: '🦁', name: 'Leo Polyglot', price: 150 },
+      { emoji: '🤖', name: 'Cyber AI Bot', price: 200 }
+    ];
+
+    function openShopModal() {
+      const container = document.getElementById('shopItemsContainer');
+      container.innerHTML = AVATAR_SHOP.map(item => {
+        const isOwned = state.unlockedAvatars.includes(item.emoji);
+        const isActive = state.activeAvatar === item.emoji;
+
+        return `
+          <div class="glass-panel p-4 rounded-2xl flex flex-col items-center text-center gap-2 border-slate-700">
+            <div class="text-4xl mb-1">${item.emoji}</div>
+            <div class="text-xs font-bold text-white">${item.name}</div>
+            ${isActive ? `
+              <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/40">DIGUNAKAN</span>
+            ` : isOwned ? `
+              <button onclick="equipAvatar('${item.emoji}', '${item.name}')" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700">Pakai</button>
+            ` : `
+              <button onclick="buyAvatar('${item.emoji}', '${item.name}', ${item.price})" class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1">
+                <i class="fa-solid fa-coins"></i> ${item.price}
+              </button>
+            `}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('shopModal').classList.remove('hidden');
+    }
+
+    function closeShopModal() {
+      document.getElementById('shopModal').classList.add('hidden');
+    }
+
+    function equipAvatar(emoji, name) {
+      state.activeAvatar = emoji;
+      state.activeAvatarName = name;
+      saveGameData();
+      openShopModal();
+    }
+
+    function buyAvatar(emoji, name, price) {
+      if (state.coins < price) return;
+      state.coins -= price;
+      state.unlockedAvatars.push(emoji);
+      state.activeAvatar = emoji;
+      state.activeAvatarName = name;
+      saveGameData();
+      openShopModal();
+    }
+
+    /* ==========================================================================
+       9. ACHIEVEMENTS SYSTEM
+       ========================================================================== */
+    const ACHIEVEMENTS_DB = [
+      { id: 'first_step', title: 'Langkah Pertama', desc: 'Selesaikan level pertama kamu', icon: '🐣' },
+      { id: 'polyglot_10', title: 'Penerjemah Handal', desc: 'Capai Level 10 pada World Quest', icon: '📜' },
+      { id: 'star_collector', title: 'Kolektor Bintang', desc: 'Dapatkan 30 Bintang Emas', icon: '⭐' }
+    ];
+
+    function openAchievementsModal() {
+      const container = document.getElementById('achievementsList');
+      container.innerHTML = ACHIEVEMENTS_DB.map(ach => `
+        <div class="glass-panel p-3 rounded-2xl flex items-center gap-3 border-slate-800">
+          <div class="text-3xl">${ach.icon}</div>
+          <div class="flex-1">
+            <h4 class="text-xs font-bold text-white">${ach.title}</h4>
+            <p class="text-[11px] text-slate-400">${ach.desc}</p>
+          </div>
+          <span class="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+            Selesai
+          </span>
+        </div>
+      `).join('');
+      document.getElementById('achievementsModal').classList.remove('hidden');
+    }
+
+    function closeAchievementsModal() {
+      document.getElementById('achievementsModal').classList.add('hidden');
+    }
+
+    /* ==========================================================================
+       10. PARTICLES BACKGROUND CANVAS
+       ========================================================================== */
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 25; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        char: ['A', 'あ', 'ㅎ', '文', '✨', '🌐'][Math.floor(Math.random() * 6)],
+        size: Math.random() * 16 + 12,
+        speedY: Math.random() * 0.8 + 0.2
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(139, 92, 246, 0.35)';
+      particles.forEach(p => {
+        p.y -= p.speedY;
+        if (p.y < -20) p.y = canvas.height + 20;
+        ctx.font = `${p.size}px Fredoka`;
+        ctx.fillText(p.char, p.x, p.y);
+      });
+      requestAnimationFrame(animateParticles);
+    }
+
+    /* START GAME ON LOAD */
+    window.onload = function () {
+      loadSaveData();
+      showHomeScreen();
+      animateParticles();
+    };
+  </script>
+</body>
+</html>
